@@ -159,20 +159,20 @@ h1{font-size:clamp(30px,5.2vw,50px);line-height:1.05;margin:0;font-weight:500;le
 
 @media(max-width:620px){
   .app{padding:9px 9px 28px}
-  .hero{min-height:450px;border-radius:24px}
+  .hero{min-height:0;border-radius:20px}
   .hero-photo{object-position:55% center}
-  .hero-overlay{background:linear-gradient(180deg,rgba(4,6,5,.5),rgba(4,6,5,.72) 42%,rgba(4,6,5,.98) 100%)}
-  .hero-content{min-height:450px;padding:19px 17px 18px}
+  .hero-overlay{background:linear-gradient(180deg,rgba(4,6,5,.55),rgba(4,6,5,.78) 50%,rgba(4,6,5,.98) 100%)}
+  .hero-content{min-height:0;padding:14px 14px 14px;gap:12px;justify-content:flex-start}
   .hero-text{min-width:0}
-.hero-main{gap:11px;align-items:flex-start}
-  .emblem{width:82px;height:82px;border-radius:0}
-  .eyebrow{font-size:8px;letter-spacing:.12em;margin-top:2px}
-  h1{font-size:27px}
-  .subtitle{font-size:11px;margin-top:8px}
-  .motto{font-size:17px;margin-top:22px;padding-left:14px}
-  .hero-bottom{align-items:flex-end}
-  .badge{font-size:11px;padding:9px 12px}
-  .today-label{font-size:11px}
+  .hero-main{gap:10px;align-items:center}
+  .emblem{width:64px;height:64px;border-radius:0}
+  .eyebrow{font-size:8px;letter-spacing:.12em;margin:0 0 4px}
+  h1{font-size:22px;line-height:1.1}
+  .subtitle{font-size:11px;margin-top:4px}
+  .motto{font-size:14px;margin-top:10px;padding-left:10px;line-height:1.3}
+  .hero-bottom{align-items:center;margin-top:2px}
+  .badge{font-size:10px;padding:7px 11px}
+  .today-label{font-size:10px}
   .schedule-panel{padding:12px;border-radius:20px}
   .day-name{font-size:23px}
   .lesson{grid-template-columns:40px minmax(0,1fr);gap:10px;padding:13px;border-radius:17px}
@@ -182,13 +182,14 @@ h1{font-size:clamp(30px,5.2vw,50px);line-height:1.05;margin:0;font-weight:500;le
   .signature-content{padding:18px}
 }
 @media(max-width:390px){
-  .hero{min-height:470px}
-  .hero-content{min-height:470px}
+  .hero{min-height:0}
+  .hero-content{min-height:0;padding:12px}
   .hero-text{min-width:0}
-.hero-main{gap:9px}
-  .emblem{width:68px;height:68px}
-  h1{font-size:24px}
-  .hero-bottom{flex-direction:column;align-items:flex-start;gap:8px}
+  .hero-main{gap:8px}
+  .emblem{width:56px;height:56px}
+  h1{font-size:20px}
+  .motto{font-size:13px;margin-top:8px}
+  .hero-bottom{flex-direction:row;align-items:center;gap:10px;flex-wrap:wrap}
   .date-btn{min-width:70px}
 }
 </style>
@@ -235,11 +236,11 @@ const TIME_SLOTS={1:'08:30 — 09:50',2:'10:00 — 11:20',3:'11:30 — 12:50',4:
 function parseISO(s){const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)}
 function fmtDate(s){const d=parseISO(s);return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`}
 function escapeHtml(s){return String(s).replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]))}
-function renderDates(){const wrap=document.getElementById('dates');wrap.innerHTML=ALL_DATES.map(s=>{const d=parseISO(s),active=s===selected;return `<button class="date-btn ${active?'active':''}" data-date="${s}"><span class="dow">${DOW[d.getDay()]}</span><span class="num">${d.getDate()}</span><span class="mon">${MONTH_SHORT[d.getMonth()]}</span></button>`}).join('');wrap.querySelectorAll('.date-btn').forEach(btn=>btn.addEventListener('click',()=>selectDate(btn.dataset.date,true)));const active=wrap.querySelector('.active');if(active)active.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'})}
+function renderDates(){const wrap=document.getElementById('dates');wrap.innerHTML=ALL_DATES.map(s=>{const d=parseISO(s),active=s===selected;return `<button class="date-btn ${active?'active':''}" data-date="${s}"><span class="dow">${DOW[d.getDay()]}</span><span class="num">${d.getDate()}</span><span class="mon">${MONTH_SHORT[d.getMonth()]}</span></button>`}).join('');wrap.querySelectorAll('.date-btn').forEach(btn=>btn.addEventListener('click',()=>selectDate(btn.dataset.date,false)));const active=wrap.querySelector('.active');if(active)active.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'})}
 function renderSchedule(){const d=parseISO(selected);document.getElementById('headerDate').textContent=fmtDate(selected);document.getElementById('dayName').textContent=(DAY_BY_DATE[selected]||DOW_FULL[d.getDay()]).replace(/^./,x=>x.toUpperCase());document.getElementById('dayDate').textContent=fmtDate(selected);const items=(DATA[selected]||[]).slice().sort((a,b)=>a.lesson-b.lesson);document.getElementById('lessonCount').textContent=items.length+' '+(items.length===1?'занятие':(items.length>=2&&items.length<=4?'занятия':'занятий'));const box=document.getElementById('lessons');if(!items.length){box.innerHTML='<div class="empty"><strong>Занятий нет</strong>На выбранную дату в расписании для группы 3102 ничего не указано.</div>';return}box.innerHTML=items.map(item=>{const time=TIME_SLOTS[item.lesson]||'Время не указано';const text=String(item.text||'').replace(/\n/g,'<br>');return `<article class="lesson"><div class="lesson-num">${item.lesson}</div><div class="lesson-body"><div class="time-badge"><span class="time-icon">◷</span>${time}</div><div class="lesson-title">${escapeHtml(text).replace(/&lt;br&gt;/g,'<br>')}</div></div></article>`}).join('')}
 function selectDate(s,scroll){selected=s;renderDates();renderSchedule();if(scroll)window.scrollTo({top:0,behavior:'smooth'})}
 function chooseInitialDate(){const now=new Date();const today=new Date(now.getFullYear(),now.getMonth(),now.getDate()).toISOString().slice(0,10);if(ALL_DATES.includes(today))return today;const future=ALL_DATES.find(x=>x>=today);return future||ALL_DATES[ALL_DATES.length-1]}
-document.getElementById('todayBtn').addEventListener('click',()=>{const now=new Date();const today=new Date(now.getFullYear(),now.getMonth(),now.getDate()).toISOString().slice(0,10);selectDate(ALL_DATES.includes(today)?today:chooseInitialDate(),true)});
+document.getElementById('todayBtn').addEventListener('click',()=>{const now=new Date();const today=new Date(now.getFullYear(),now.getMonth(),now.getDate()).toISOString().slice(0,10);selectDate(ALL_DATES.includes(today)?today:chooseInitialDate(),false)});
 async function loadExactSchedule(){
   try{
     const res=await fetch(SOURCE_URL,{cache:'no-store'});
